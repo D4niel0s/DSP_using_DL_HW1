@@ -3,8 +3,6 @@ import numpy as np, matplotlib.pyplot as plt, pyworld as pw, soundfile as sf
 from scipy.signal import resample
 
 def main():
-    print("Save audio files? (Y/N)")
-    save = input()
 
     y, sampling_rate = librosa.load('recording.wav', mono=True)
 
@@ -20,6 +18,19 @@ def main():
     data = resample(y, number_of_samples)
 
 
+    noisy_data = add_noise(data)
+    graph_audio_stats(noisy_data, new_rate)
+
+    plt.show()
+
+
+
+
+
+def downsampling_two_methods(data, sampling_rate):
+    print("Save audio files? (Y/N)")
+    save = input()
+
     #Downsample to 16KHz using method 1
     m1_down_sample = data[::2]
 
@@ -28,18 +39,17 @@ def main():
     m2_down_sample = resample(data, round(len(data)*0.5))
 
     if (save == 'Y' or save == 'y'):
-        sf.write('even_samples_resample.wav', m1_down_sample,round(new_rate/2))
-        sf.write('scipy_resampled.wav', m2_down_sample, round(new_rate/2))
+        sf.write('even_samples_resample.wav', m1_down_sample,round(sampling_rate/2))
+        sf.write('scipy_resampled.wav', m2_down_sample, round(sampling_rate/2))
         
     
-    graph_audio_stats(m1_down_sample, round(new_rate/2))
+    graph_audio_stats(m1_down_sample, round(sampling_rate/2))
     plt.suptitle("Even samples resample")
 
-    graph_audio_stats(m2_down_sample, round(new_rate/2))
+    graph_audio_stats(m2_down_sample, round(sampling_rate/2))
     plt.suptitle("Scipy resample")
 
     plt.show()
-
 
 
 
@@ -102,6 +112,14 @@ def graph_audio_stats(data, sampling_rate):
     
 
     plt.subplots_adjust(hspace=1)
+
+def add_noise(data):
+    noise, _ = librosa.load('stationary_noise.wav', mono=True)
+    noise = noise[:len(data)]
+    data = data[:len(noise)]
+
+    return data + noise
+
 
 
 if __name__ == '__main__':
