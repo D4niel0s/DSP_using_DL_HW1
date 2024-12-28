@@ -18,14 +18,10 @@ def main():
     number_of_samples = round(len(y) * float(new_rate) / sampling_rate)
     clean_data = resample(y, number_of_samples)
 
-    noisy_data = add_noise(clean_data)
-    sf.write('orig.wav', noisy_data, new_rate)
-    clean_data = cancel_noise(noisy_data, noise_floor=2,buffer_size=round(new_rate * (20e-3)),hop=round(new_rate * (10e-3)))
-    
-    sf.write('clean.wav', clean_data, new_rate)
-    
-    # sf.write('clean.wav', clean_data, new_rate)
-    # graph_audio_stats(noisy_data, new_rate)
+
+    noisy_data = add_noise(data)
+    sf.write('stereo_file.wav', noisy_data, new_rate)
+    graph_audio_stats(noisy_data, new_rate)
 
     plt.show()
 
