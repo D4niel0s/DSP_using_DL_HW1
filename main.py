@@ -19,7 +19,7 @@ def main():
 
 
     noisy_data = add_noise(data)
-    sf.write('stereo_file.wav', data, new_rate)
+    sf.write('stereo_file.wav', noisy_data, new_rate)
     graph_audio_stats(noisy_data, new_rate)
 
     plt.show()
