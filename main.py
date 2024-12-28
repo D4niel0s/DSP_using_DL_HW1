@@ -1,6 +1,7 @@
 import librosa
 import numpy as np, matplotlib.pyplot as plt, pyworld as pw, soundfile as sf
 from scipy.signal import resample
+from noise_cancelling import *
 
 def main():
 
@@ -15,12 +16,16 @@ def main():
 
     y = y.astype(np.float32)
     number_of_samples = round(len(y) * float(new_rate) / sampling_rate)
-    data = resample(y, number_of_samples)
+    clean_data = resample(y, number_of_samples)
 
-
-    noisy_data = add_noise(data)
-    sf.write('stereo_file.wav', data, new_rate)
-    graph_audio_stats(noisy_data, new_rate)
+    noisy_data = add_noise(clean_data)
+    sf.write('orig.wav', noisy_data, new_rate)
+    clean_data = cancel_noise(noisy_data, noise_floor=2,buffer_size=round(new_rate * (20e-3)),hop=round(new_rate * (10e-3)))
+    
+    sf.write('clean.wav', clean_data, new_rate)
+    
+    # sf.write('clean.wav', clean_data, new_rate)
+    # graph_audio_stats(noisy_data, new_rate)
 
     plt.show()
 
@@ -100,7 +105,7 @@ def graph_audio_stats(data, sampling_rate):
 
 
     time_points = np.arange(len(energy_curve)) * (hop_size / sampling_rate)
-
+        
     ax[3].plot(time_points, energy_curve, label='Energy', color='b')
     ax[3].plot(time_points, RMS_curve, label='RMS', color='g')
     ax[3].set(title='Energy and RMS over time', xlabel='time')
