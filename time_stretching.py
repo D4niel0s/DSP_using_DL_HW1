@@ -1,4 +1,4 @@
-from main import *
+from utils import *
 
 
 def time_stretching_wrapper(data, sampling_rate, save=False, plot=False):
