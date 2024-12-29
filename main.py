@@ -7,6 +7,7 @@ from time_stretching import *
 def main():
 
     print("Which section(s) do you want to run? (Close plots to run next section)\n \
+          0 - Plot origin audio\n \
           1 - Downsampling two methods\n \
           2 - Adding noise\n \
           3 - Spectral subtraction\n \
@@ -25,9 +26,11 @@ def main():
         number_of_samples = round(len(y) * float(new_rate) / sampling_rate)
         data = resample(y, number_of_samples)
 
-        print(f"Save audio for section {i}? (y/n)")
-        save = input()
-        save = True if save == 'y' or save == 'Y' else False
+        save = False
+        if int(i) != 0:
+            print(f"Save audio for section {i}? (y/n)")
+            save = input()
+            save = True if save == 'y' or save == 'Y' else False
 
         runSection(data, new_rate, int(i), save)
         plt.show()
@@ -35,7 +38,10 @@ def main():
 
 
 def runSection(data, sampling_rate, sec_num, save):
-    if sec_num == 1:
+    if sec_num == 0:
+        graph_audio_stats(data, sampling_rate)
+        plt.suptitle("Origin audio signal")
+    elif sec_num == 1:
         downsampling_two_methods(data, sampling_rate, save, plot=True)
     elif sec_num == 2:
         add_noise(data, sampling_rate, save, plot=True)
