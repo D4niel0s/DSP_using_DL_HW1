@@ -1,38 +1,58 @@
 import librosa
 import numpy as np, matplotlib.pyplot as plt, pyworld as pw, soundfile as sf
 from scipy.signal import resample
+
+#Our modules
 from noise_cancelling import *
+from AGC import *
+from time_stretching import *
 
 def main():
 
-    y, sampling_rate = librosa.load('recording.wav', mono=True)
+    print("Which section(s) do you want to run? (Close plots to run next section)\n \
+          1 - Downsampling two methods\n \
+          2 - Adding noise\n \
+          3 - Spectral subtraction\n \
+          4 - AGC\n \
+          5 - Time stretching\n \
+          (Enter a list e.g 1,2,3 or a single number)")
+    
+    sections = tuple(input().split(','))
 
-    print(f'{y.shape=}')
-    print(f'{sampling_rate=}')
+    for i in sections:
+        y, sampling_rate = librosa.load('recording.wav', mono=True)
 
+        # Resample data to 32KHz
+        new_rate = 32000
+        y = y.astype(np.float32)
+        number_of_samples = round(len(y) * float(new_rate) / sampling_rate)
+        data = resample(y, number_of_samples)
 
-    # Resample data to 32KHz
-    new_rate = 32000
+        print(f"Save audio for section {i}? (y/n)")
+        save = input()
+        save = True if save == 'y' or save == 'Y' else False
 
-    y = y.astype(np.float32)
-    number_of_samples = round(len(y) * float(new_rate) / sampling_rate)
-    clean_data = resample(y, number_of_samples)
-
-
-    noisy_data = add_noise(data)
-    sf.write('stereo_file.wav', noisy_data, new_rate)
-    graph_audio_stats(noisy_data, new_rate)
-
-    plt.show()
-
+        runSection(data, new_rate, int(i), save)
+        plt.show()
 
 
 
+def runSection(data, sampling_rate, sec_num, save):
+    if sec_num == 1:
+        downsampling_two_methods(data, sampling_rate, save, plot=True)
+    elif sec_num == 2:
+        add_noise(data, sampling_rate, save, plot=True)
+    elif sec_num == 3:
+        print("SHAHAR IMPLEMENT THIS WRAPPER נגמר לי הכוח")
+    elif sec_num == 4:
+        AGC_wrapper(data, sampling_rate, save, plot=True)
+    elif sec_num == 5:
+        time_stretching_wrapper(data, sampling_rate, save, plot=True)
+    else:
+        print(f"Section {sec_num} does not exist :(")
 
-def downsampling_two_methods(data, sampling_rate):
-    print("Save audio files? (Y/N)")
-    save = input()
 
+def downsampling_two_methods(data, sampling_rate, save=False, plot=False):
     #Downsample to 16KHz using method 1
     m1_down_sample = data[::2]
 
@@ -40,18 +60,44 @@ def downsampling_two_methods(data, sampling_rate):
     #Downsample to 16KHz using method 2
     m2_down_sample = resample(data, round(len(data)*0.5))
 
-    if (save == 'Y' or save == 'y'):
+    if (save):
         sf.write('even_samples_resample.wav', m1_down_sample,round(sampling_rate/2))
         sf.write('scipy_resampled.wav', m2_down_sample, round(sampling_rate/2))
         
+    if (plot):
+        graph_audio_stats(m1_down_sample, round(sampling_rate/2))
+        plt.suptitle("Even samples resample")
+
+        graph_audio_stats(m2_down_sample, round(sampling_rate/2))
+        plt.suptitle("Scipy resample")
+
+
+
+def add_noise(data, sampling_rate, save=False, plot=False):
+    noise, sr = librosa.load('stationary_noise.wav', mono=True)
+
+    new_rate = 16000
+    number_of_samples = round(len(noise) * float(new_rate) / sr)
+    noise = resample(noise, number_of_samples)
     
-    graph_audio_stats(m1_down_sample, round(sampling_rate/2))
-    plt.suptitle("Even samples resample")
+    #Truncating to the max-length
+    noise = noise[:len(data)]
+    data = data[:len(noise)]
 
-    graph_audio_stats(m2_down_sample, round(sampling_rate/2))
-    plt.suptitle("Scipy resample")
+    if (plot):
+        graph_audio_stats(noise, new_rate)
+        plt.suptitle("Noise")
 
-    plt.show()
+        graph_audio_stats(data, sampling_rate)
+        plt.suptitle("Clean data")
+
+        graph_audio_stats(data+noise, sampling_rate)
+        plt.suptitle("Noisy data")
+
+    if (save):
+        sf.write("noisy_data.wav", data+noise, sampling_rate)
+
+    return data + noise
 
 
 
@@ -114,14 +160,6 @@ def graph_audio_stats(data, sampling_rate):
     
 
     plt.subplots_adjust(hspace=1)
-
-def add_noise(data):
-    noise, _ = librosa.load('stationary_noise.wav', mono=True)
-    noise = noise[:len(data)]
-    data = data[:len(noise)]
-
-    return data + noise
-
 
 
 if __name__ == '__main__':
