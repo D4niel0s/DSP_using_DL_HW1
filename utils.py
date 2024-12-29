@@ -53,6 +53,7 @@ def graph_audio_stats(data, sampling_rate):
     ax[3].plot(time_points, energy_curve, label='Energy', color='b')
     ax[3].plot(time_points, RMS_curve, label='RMS', color='g')
     ax[3].set(title='Energy and RMS over time', xlabel='time')
+    ax[3].legend()
     ax[3].label_outer()
     
 
