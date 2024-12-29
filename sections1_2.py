@@ -36,9 +36,6 @@ def add_noise(data, sampling_rate, save=False, plot=False):
         graph_audio_stats(noise, new_rate)
         plt.suptitle("Noise")
 
-        graph_audio_stats(data, sampling_rate)
-        plt.suptitle("Clean data")
-
         graph_audio_stats(data+noise, sampling_rate)
         plt.suptitle("Noisy data")
 
