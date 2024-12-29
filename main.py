@@ -17,7 +17,7 @@ def main():
     sections = tuple(input().split(','))
 
     for i in sections:
-        y, sampling_rate = librosa.load('asmr.wav', mono=True)
+        y, sampling_rate = librosa.load('recording.wav', mono=True)
 
         # Resample data to 32KHz
         new_rate = 32000
