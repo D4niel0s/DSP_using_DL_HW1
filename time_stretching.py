@@ -1,22 +1,20 @@
 from main import *
 
 
+def time_stretching_wrapper(data, sampling_rate, save=False, plot=False):
+    factor = 1.5
+    time_stretched = increase_speed(data, factor)
 
-
-def main():
-    y, sr = librosa.load('daniel-rec.wav', mono=True)
+    if (save):
+        sf.write('time_stretched.wav', time_stretched, sampling_rate)
     
-    graph_audio_stats(y, sr)
+    if (plot):
+        graph_audio_stats(time_stretched, sampling_rate)
+        plt.suptitle(f"Time stretched data by a factor of {factor}")
 
-    increase_speed(y, sr, 2)
+def increase_speed(audio, factor):
 
-
-
-def increase_speed(audio, sampling_rate, factor):
-    print("Save audio files? (Y/N)")
-    save = input()
-
-    #Maping from output
+    #Maping from output to input
     mapping = lambda t: t*factor
 
     D = librosa.stft(audio)
@@ -48,21 +46,5 @@ def increase_speed(audio, sampling_rate, factor):
 
 
     time_stretched = librosa.istft(time_stretched)
-
     
-    if (save == 'Y' or save == 'y'):
-        sf.write('time_stretched.wav', time_stretched, sampling_rate)
-    
-    graph_audio_stats(time_stretched, sampling_rate)
-    plt.suptitle("Time stretched audio")
-    
-    plt.show()
-
-
-
-
-
-
-
-if __name__ == '__main__':
-    main()
+    return time_stretched
