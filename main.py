@@ -46,7 +46,8 @@ def runSection(data, sampling_rate, sec_num, save):
     elif sec_num == 2:
         add_noise(data, sampling_rate, save, plot=True)
     elif sec_num == 3:
-        print("SHAHAR IMPLEMENT THIS WRAPPER נגמר לי הכוח")
+        noise_floor = 0.5
+        cancel_noise(data, noise_floor, sampling_rate, save, plot=True)
     elif sec_num == 4:
         AGC_wrapper(data, sampling_rate, save, plot=True)
     elif sec_num == 5:
