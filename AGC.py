@@ -2,30 +2,22 @@ from main import *
 
 import collections
 
-def main():
-    
-    y, sampling_rate = librosa.load('daniel_rec.wav', mono=True)
+def AGC_wrapper(data, sampling_rate, save=False, plot=False):
+    window_size = round(sampling_rate * (20e-3))
+    hop_size = round(sampling_rate * (10e-3))
 
-    print(f'{y.shape=}')
-    print(f'{sampling_rate=}')
+    threshold = -40
+    target = -10
+    relevant_win_size = 10000
 
+    agc_data = AGC(data, window_size, hop_size, relevant_win_size, threshold, target)
 
-    # Resample data to 32KHz
-    new_rate = 32000
+    if (save):
+        sf.write('data_AGC.wav', agc_data, sampling_rate)
 
-    y = y.astype(np.float32)
-    number_of_samples = round(len(y) * float(new_rate) / sampling_rate)
-    data = resample(y, number_of_samples)
-
-    
-    window_size = round(new_rate * (20e-3))
-    hop_size = round(new_rate * (10e-3))
-
-    agc_data = AGC(data, window_size, hop_size, 10000, -40, -10)
-
-    sf.write('daniel_rec_agc.wav', agc_data, new_rate)
-
-    return
+    if (plot):
+        graph_audio_stats(agc_data, sampling_rate)
+        plt.suptitle("data after applying AGC")
 
 
 
@@ -57,8 +49,3 @@ def AGC(data, window_size, hop_size, relevant_win_size, floor_threshold ,target_
         new_data[t:t+window_size] = frame * gain
 
     return new_data
-        
-
-
-if __name__ == '__main__':
-    main()
